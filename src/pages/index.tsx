@@ -1,80 +1,48 @@
 import React, { useState } from 'react';
+import Papa from 'papaparse';
+import { CellType } from '../types/types';
+import Cell from '../components/Cell';
+import Row from '../components/Row';
+import { Wrapper } from '../styles/Cell';
+import { useAppStore } from '../../store/store';
 
 const Home = () => {
-  const [file, setFile] = useState<Blob>();
-  const [array, setArray] = useState([]);
-
-  const fileReader = new FileReader();
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    setFile(e.target.files[0]);
-  };
-
-  const csvFileToArray = (string) => {
-    const csvHeader = string.slice(0, string.indexOf('\n')).split(',');
-    const csvRows = string.slice(string.indexOf('\n') + 1).split('\n');
-
-    const array = csvRows.map((i) => {
-      const values = i.split(',');
-      const obj = csvHeader.reduce((object, header, index) => {
-        object[header] = values[index];
-        return object;
-      }, {});
-      return obj;
+  const { saveData, cells } = useAppStore();
+  const [tableRows, setTableRows] = useState([]);
+  const [data, setData] = useState<CellType[]>([]);
+  const changeHandler = (event: any) => {
+    Papa.parse(event.target.files[0], {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (results: any) {
+        const rowsArray: any = [];
+        results.data.map((d: any) => {
+          rowsArray.push(Object.keys(d));
+        });
+        setTableRows(rowsArray[0]);
+        setData(results.data);
+        saveData(results.data);
+      }
     });
-
-    setArray(array);
   };
+  console.log(cells);
 
-  console.log(file);
-  const handleOnSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-    if (file) {
-      fileReader.onload = function (event) {
-        const csvOutput = event.target!.result;
-      };
-
-      fileReader.readAsText(file);
-    }
-  };
-
-  const headerKeys = Object.keys(Object.assign({}, ...array));
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h1>REACTJS CSV IMPORT EXAMPLE </h1>
-      <form>
-        <input type={'file'} id={'csvFileInput'} accept={'.csv'} onChange={handleOnChange} />
-
-        <button
-          onClick={(e) => {
-            handleOnSubmit(e);
-          }}>
-          IMPORT CSV
-        </button>
-      </form>
-
+    <div>
+      <input
+        type="file"
+        name="file"
+        onChange={changeHandler}
+        accept=".csv"
+        style={{ display: 'block', margin: '10px auto' }}
+      />
       <br />
+      <br />
+      <Wrapper>
+        {tableRows && tableRows.map((rows, index) => <Row key={index} row={rows} />)}
+      </Wrapper>
 
-      <table>
-        <thead>
-          <tr key={'header'}>
-            {headerKeys.map((key) => (
-              <th>{key}</th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-          {array.map((item) => (
-            <tr key={item.id}>
-              {Object.values(item).map((val) => (
-                <td>{val}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {data && data.map((cell) => <Cell key={cell.TransactionId} cell={cell} />)}
     </div>
   );
 };

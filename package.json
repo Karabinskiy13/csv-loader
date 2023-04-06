@@ -35,6 +35,7 @@
     "lodash.debounce": "^4.0.8",
     "next": "^13.0.2",
     "next-with-less": "^2.0.5",
+    "papaparse": "^5.4.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "styled-components": "^5.3.6",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",
     "@types/node": "18.11.5",
+    "@types/papaparse": "^5.3.7",
     "@types/react": "18.0.23",
     "@types/react-slick": "^0.23.10",
     "@types/react-star-ratings": "^2.3.0",
