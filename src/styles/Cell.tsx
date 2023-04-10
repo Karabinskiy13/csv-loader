@@ -5,6 +5,7 @@ export const CellStyle = styled.div`
 `;
 
 export const RowStyle = styled.div`
+  display: flex;
   width: 100%;
 `;
 
