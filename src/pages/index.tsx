@@ -16,12 +16,17 @@ const Home = () => {
   const [itemOffset, setItemOffset] = useState(0);
 
   const { CSVDownloader, Type } = useCSVDownloader();
-  const { saveData, cells, saveRows, rows } = useAppStore();
-
+  const { saveData, cells, saveRows, rows, filteredCells } = useAppStore();
   const endOffset = itemOffset + 10;
 
-  const currentItems = cells.slice(itemOffset, endOffset);
-  const pageCount = Math.ceil(cells.length / 10);
+  const currentItems =
+    filteredCells?.length === 0
+      ? cells.slice(itemOffset, endOffset)
+      : filteredCells.slice(itemOffset, endOffset);
+  const pageCount =
+    filteredCells?.length === 0
+      ? Math.ceil(cells.length / 10)
+      : Math.ceil(filteredCells.length / 10);
 
   const changeHandler = (event: any) => {
     Papa.parse(event.target.files[0], {
