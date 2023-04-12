@@ -1,14 +1,28 @@
 import React, { useEffect, useState } from 'react';
+
 import Papa from 'papaparse';
+import { useCSVDownloader } from 'react-papaparse';
+
 import Cell from '../components/Cell';
 import Row from '../components/Row';
-import { Wrapper } from '../styles/Cell';
-import { useAppStore } from '../../store/store';
 import NavBar from '../components/NavBar';
 
+import { Wrapper } from '../styles/Cell';
+import { useAppStore } from '../../store/store';
+import { MyPaginate } from '../styles/Pagination';
+
 const Home = () => {
-  const { saveData, cells, saveRows, rows } = useAppStore();
   const [domLoaded, setDomLoaded] = useState(false);
+  const [itemOffset, setItemOffset] = useState(0);
+
+  const { CSVDownloader, Type } = useCSVDownloader();
+  const { saveData, cells, saveRows, rows } = useAppStore();
+
+  const endOffset = itemOffset + 10;
+
+  const currentItems = cells.slice(itemOffset, endOffset);
+  const pageCount = Math.ceil(cells.length / 10);
+
   const changeHandler = (event: any) => {
     Papa.parse(event.target.files[0], {
       header: true,
@@ -23,6 +37,12 @@ const Home = () => {
       }
     });
   };
+
+  const handlePageClick = (event: any) => {
+    const newOffset = (event.selected * 10) % cells.length;
+    setItemOffset(newOffset);
+  };
+
   useEffect(() => {
     setDomLoaded(true);
   });
@@ -33,8 +53,32 @@ const Home = () => {
       <Wrapper style={{ display: 'flex' }}>
         {rows && domLoaded && rows.map((rows, index) => <Row key={index} row={rows} />)}
       </Wrapper>
-
-      {cells && domLoaded && cells.map((cell) => <Cell key={cell.TransactionId} cell={cell} />)}
+      <div>
+        {currentItems &&
+          domLoaded &&
+          currentItems.map((cell) => <Cell key={cell.TransactionId} cell={cell} />)}
+      </div>
+      <div>
+        <CSVDownloader
+          type={Type.Button}
+          filename={'filename'}
+          bom={true}
+          data={() => {
+            return cells;
+          }}>
+          Download
+        </CSVDownloader>
+      </div>
+      <MyPaginate
+        className="react-paginate"
+        breakLabel="..."
+        nextLabel="next >"
+        onPageChange={handlePageClick}
+        pageRangeDisplayed={5}
+        pageCount={pageCount}
+        previousLabel="< previous"
+        renderOnZeroPageCount={null}
+      />
     </div>
   );
 };

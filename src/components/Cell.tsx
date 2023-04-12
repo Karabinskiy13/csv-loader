@@ -11,6 +11,7 @@ const Cell = ({ cell }: CellProps) => {
   const [value, setValue] = useState('');
   const onChange = (e: any) => {
     setValue(e.target.value);
+    console.log(e.target.value);
   };
   const { changeType } = useAppStore();
   return (
